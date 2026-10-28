@@ -1,0 +1,28 @@
+name: Self Test
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run the action on itself
+        uses: jilimb0/udpa-engine@v1
+        with:
+          target-path: '.'
+          min-score: '0'
+          stage: 'MVP'
+
+      - name: Archive passport
+        uses: actions/upload-artifact@v4
+        if: hashFiles('udpa-zk-passport.json') != ''
+        with:
+          name: self-test-passport
+          path: udpa-zk-passport.json
+          if-no-files-found: ignore
