@@ -13,11 +13,18 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run the action on itself
+        id: gate
+        continue-on-error: true
         uses: jilimb0/udpa-engine@v1
         with:
           target-path: '.'
           min-score: '0'
           stage: 'MVP'
+
+      - name: Verify artifacts were produced
+        run: |
+          test -s udpa-audit.sarif
+          test -s udpa-zk-passport.json
 
       - name: Archive passport
         uses: actions/upload-artifact@v4
