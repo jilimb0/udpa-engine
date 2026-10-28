@@ -42,6 +42,9 @@ outputs:
   passport-file:
     description: 'Path to generated Ed25519 Zero-Knowledge Passport'
     value: ${{ steps.udpa-gate.outputs.passport-file }}
+  score:
+    description: 'Assay Purity Score (0-100)'
+    value: ${{ steps.udpa-gate.outputs.score }}
 
 runs:
   using: 'composite'
@@ -75,10 +78,13 @@ runs:
         fi
 
         GATE_LOG="$(mktemp)"
+        CLEAN_LOG="$(mktemp)"
         node "$ENGINE" underwrite "${{ inputs.target-path }}" --stage "${{ inputs.stage }}" --min-purity "$MIN_PURITY" --sarif-out "${{ inputs.sarif-output }}" | tee "$GATE_LOG"
         GATE_STATUS=${PIPESTATUS[0]}
 
-        SCORE="$(grep -oE 'Assay Purity Score: [0-9]+' "$GATE_LOG" | head -n1 | grep -oE '[0-9]+')"
+        ESC="$(printf '\033')"
+        sed -E "s/${ESC}\[[0-9;]*[A-Za-z]//g" "$GATE_LOG" > "$CLEAN_LOG"
+        SCORE="$(grep -oE 'Assay Purity Score: [0-9]+' "$CLEAN_LOG" | head -n1 | grep -oE '[0-9]+')"
         if [ -n "$SCORE" ]; then
           echo "UDPA purity score: **$SCORE/100** (required: $MIN_PURITY)" >> "$GITHUB_STEP_SUMMARY"
         fi
@@ -93,3 +99,4 @@ runs:
 
         echo "sarif-file=${{ inputs.sarif-output }}" >> "$GITHUB_OUTPUT"
         echo "passport-file=${{ inputs.passport-output }}" >> "$GITHUB_OUTPUT"
+        echo "score=$SCORE" >> "$GITHUB_OUTPUT"
