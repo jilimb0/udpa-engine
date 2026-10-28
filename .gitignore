@@ -1,0 +1,7 @@
+node_modules/
+.DS_Store
+*.log
+
+# Gate outputs
+udpa-audit.sarif
+udpa-zk-passport.json

@@ -1,0 +1,66 @@
+name: 'UDPA Engine — Sovereign Software Assay & Capital Underwriting Covenant'
+description: 'Runs bundled Gavel v1.0.0 assay engine (no build step): deterministic AST/Taint/FinOps assay, Ed25519 Zero-Knowledge Passport & OASIS SARIF 2.1.0 export.'
+author: 'UDPA / Gavel Protocol'
+branding:
+  icon: 'shield'
+  color: 'yellow'
+
+inputs:
+  target-path:
+    description: 'Relative path to the repository or subdirectory to assay'
+    required: false
+    default: '.'
+  min-purity:
+    description: 'Minimum required Assay Purity Score (0-100) to pass the covenant gate'
+    required: false
+    default: '80'
+  min-score:
+    description: 'Legacy alias for min-purity'
+    required: false
+    default: '80'
+  stage:
+    description: 'Project lifecycle stage (Idea | MVP | Scale)'
+    required: false
+    default: 'Scale'
+  sarif-output:
+    description: 'Output file path for OASIS SARIF 2.1.0 report'
+    required: false
+    default: 'udpa-audit.sarif'
+  passport-output:
+    description: 'Output file path for Ed25519 + SHA-256 Merkle Zero-Knowledge Passport'
+    required: false
+    default: 'udpa-zk-passport.json'
+
+outputs:
+  sarif-file:
+    description: 'Path to generated OASIS SARIF 2.1.0 file'
+    value: ${{ steps.udpa-gate.outputs.sarif-file }}
+  passport-file:
+    description: 'Path to generated Ed25519 Zero-Knowledge Passport'
+    value: ${{ steps.udpa-gate.outputs.passport-file }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js 22
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+
+    - name: Execute UDPA Covenant Gate, SARIF 2.1.0 & Ed25519 ZK Seal
+      id: udpa-gate
+      shell: bash
+      run: |
+        MIN_PURITY="${{ inputs.min-purity }}"
+        if [ -z "${MIN_PURITY// /}" ] || [ "$MIN_PURITY" = "80" ]; then
+          ALIAS="${{ inputs.min-score }}"
+          if [ -n "${ALIAS// /}" ] && [ "$ALIAS" != "80" ]; then
+            MIN_PURITY="$ALIAS"
+          fi
+        fi
+        ENGINE="${{ github.action_path }}/engine/gavel-engine.cjs"
+        chmod +x "$ENGINE"
+        node "$ENGINE" seal "${{ inputs.target-path }}" --stage "${{ inputs.stage }}" --out "${{ inputs.passport-output }}"
+        node "$ENGINE" underwrite "${{ inputs.target-path }}" --stage "${{ inputs.stage }}" --min-purity "$MIN_PURITY" --sarif-out "${{ inputs.sarif-output }}"
+        echo "sarif-file=${{ inputs.sarif-output }}" >> "$GITHUB_OUTPUT"
+        echo "passport-file=${{ inputs.passport-output }}" >> "$GITHUB_OUTPUT"
