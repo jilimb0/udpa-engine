@@ -30,6 +30,10 @@ inputs:
     description: 'Output file path for Ed25519 + SHA-256 Merkle Zero-Knowledge Passport'
     required: false
     default: 'udpa-zk-passport.json'
+  fail-on-breach:
+    description: 'Fail the step when the assay verdict is below min-purity. Set to false for advisory (warning-only) runs.'
+    required: false
+    default: 'true'
 
 outputs:
   sarif-file:
@@ -51,6 +55,8 @@ runs:
       id: udpa-gate
       shell: bash
       run: |
+        set +e
+
         MIN_PURITY="${{ inputs.min-purity }}"
         if [ -z "${MIN_PURITY// /}" ] || [ "$MIN_PURITY" = "80" ]; then
           ALIAS="${{ inputs.min-score }}"
@@ -58,9 +64,32 @@ runs:
             MIN_PURITY="$ALIAS"
           fi
         fi
+
         ENGINE="${{ github.action_path }}/engine/gavel-engine.cjs"
         chmod +x "$ENGINE"
+
         node "$ENGINE" seal "${{ inputs.target-path }}" --stage "${{ inputs.stage }}" --out "${{ inputs.passport-output }}"
-        node "$ENGINE" underwrite "${{ inputs.target-path }}" --stage "${{ inputs.stage }}" --min-purity "$MIN_PURITY" --sarif-out "${{ inputs.sarif-output }}"
+        SEAL_STATUS=$?
+        if [ "$SEAL_STATUS" -ne 0 ]; then
+          exit "$SEAL_STATUS"
+        fi
+
+        GATE_LOG="$(mktemp)"
+        node "$ENGINE" underwrite "${{ inputs.target-path }}" --stage "${{ inputs.stage }}" --min-purity "$MIN_PURITY" --sarif-out "${{ inputs.sarif-output }}" | tee "$GATE_LOG"
+        GATE_STATUS=${PIPESTATUS[0]}
+
+        SCORE="$(grep -oE 'Assay Purity Score: [0-9]+' "$GATE_LOG" | head -n1 | grep -oE '[0-9]+')"
+        if [ -n "$SCORE" ]; then
+          echo "UDPA purity score: **$SCORE/100** (required: $MIN_PURITY)" >> "$GITHUB_STEP_SUMMARY"
+        fi
+
+        if [ "$GATE_STATUS" -ne 0 ]; then
+          if [ "${{ inputs.fail-on-breach }}" != "true" ] && [ -s "${{ inputs.sarif-output }}" ]; then
+            echo "::warning title=UDPA gate::Purity score ${SCORE:-below threshold}/100, required $MIN_PURITY — advisory mode, not failing the job."
+          else
+            exit "$GATE_STATUS"
+          fi
+        fi
+
         echo "sarif-file=${{ inputs.sarif-output }}" >> "$GITHUB_OUTPUT"
         echo "passport-file=${{ inputs.passport-output }}" >> "$GITHUB_OUTPUT"

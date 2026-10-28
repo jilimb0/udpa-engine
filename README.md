@@ -17,6 +17,20 @@ by tag — nothing needs to be vendored into each repository:
 
 Outputs: `sarif-file`, `passport-file` (paths to generated artifacts).
 
+### Advisory mode
+
+By default a score below `min-purity` fails the step. Set `fail-on-breach: 'false'`
+to finish successfully with a `::warning::` annotation, a job-summary line and the
+SARIF/passport artifacts instead — useful while a project is below the target score:
+
+```yaml
+- uses: jilimb0/udpa-engine@v1
+  with:
+    target-path: '.'
+    min-score: '85'
+    fail-on-breach: 'false'
+```
+
 ## Contents
 
 - `action.yml` — composite action definition (inputs/outputs mirror the upstream Gavel action).

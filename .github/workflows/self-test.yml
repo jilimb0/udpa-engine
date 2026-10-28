@@ -6,20 +6,19 @@ on:
   workflow_dispatch:
 
 jobs:
-  gate:
+  advisory:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Run the action on itself
-        id: gate
-        continue-on-error: true
+      - name: Run the action on itself (advisory)
         uses: jilimb0/udpa-engine@v1
         with:
           target-path: '.'
           min-score: '0'
           stage: 'MVP'
+          fail-on-breach: 'false'
 
       - name: Verify artifacts were produced
         run: |
@@ -33,3 +32,25 @@ jobs:
           name: self-test-passport
           path: udpa-zk-passport.json
           if-no-files-found: ignore
+
+  enforce:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run the action on itself (enforcing)
+        id: gate
+        continue-on-error: true
+        uses: jilimb0/udpa-engine@v1
+        with:
+          target-path: '.'
+          min-score: '0'
+          stage: 'MVP'
+          fail-on-breach: 'true'
+
+      - name: Assert the gate fails in enforcing mode
+        if: steps.gate.outcome != 'failure'
+        run: |
+          echo "Expected the gate to fail with fail-on-breach=true"
+          exit 1
