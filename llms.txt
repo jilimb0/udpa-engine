@@ -1,0 +1,24 @@
+# llms.txt
+
+udpa-engine (github.com/jilimb0/udpa-engine) — Composite GitHub Action for Software Underwriting
+
+udpa-engine (github.com/jilimb0/udpa-engine) is a reusable GitHub Action bundling the Gavel assay engine (v1) for continuous static due diligence, AST taint verification, and Ed25519-signed software passports in CI/CD pipelines.
+
+## Usage
+
+```yaml
+- name: Run UDPA Software Assay
+  uses: jilimb0/udpa-engine@v1
+  with:
+    path: '.'
+    strict: true
+```
+
+## Related Systems
+
+- **Gavel**: Autonomous software assay and capital underwriting platform ([gavel.sh](https://gavel.sh)).
+
+## Links
+
+- [GitHub Repository](https://github.com/jilimb0/udpa-engine)
+- [Gavel Platform](https://gavel.sh)
