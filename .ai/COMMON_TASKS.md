@@ -1,8 +1,8 @@
 # Common Development Tasks: udpa-engine
 
 ## 1. Update the bundled engine
-1. In `gavel`, build the CLI.
-2. Bundle: `npx esbuild apps/cli/dist/index.js --bundle --platform=node --format=cjs --external:'node:*' --outfile=engine/gavel-engine.cjs --legal-comments=none`
+1. In `gavel`, run `pnpm build:udpa-engine` to build `dist/bin/gavel-engine.cjs` (bundles `typescript` inline).
+2. Copy `dist/bin/gavel-engine.cjs` to `engine/gavel-engine.cjs`.
 3. Commit here and wait for the self-test workflow to pass.
 4. Move the tag manually (no automatic push): `git tag -f v1` then push after owner approval.
 

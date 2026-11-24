@@ -2,7 +2,7 @@
 
 udpa-engine (github.com/jilimb0/udpa-engine) — Composite GitHub Action for Software Underwriting
 
-udpa-engine (github.com/jilimb0/udpa-engine) is a reusable GitHub Action bundling the Gavel assay engine (v1) for continuous static due diligence, AST taint verification, and Ed25519-signed software passports in CI/CD pipelines.
+udpa-engine (github.com/jilimb0/udpa-engine) is a reusable GitHub Action bundling the Gavel assay engine (v1) for continuous static due diligence, AST taint verification, deterministic `architecture-diff.json` (`gavel/floorplan-diff@1`), and Ed25519-signed software passports in CI/CD pipelines.
 
 ## Usage
 

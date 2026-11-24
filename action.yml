@@ -30,6 +30,10 @@ inputs:
     description: 'Output file path for Ed25519 + SHA-256 Merkle Zero-Knowledge Passport'
     required: false
     default: 'udpa-zk-passport.json'
+  architecture-diff-output:
+    description: 'Output file path for deterministic architecture diff JSON'
+    required: false
+    default: 'architecture-diff.json'
   fail-on-breach:
     description: 'Fail the step when the assay verdict is below min-purity. Set to false for advisory (warning-only) runs.'
     required: false
@@ -42,6 +46,9 @@ outputs:
   passport-file:
     description: 'Path to generated Ed25519 Zero-Knowledge Passport'
     value: ${{ steps.udpa-gate.outputs.passport-file }}
+  architecture-diff-file:
+    description: 'Path to generated deterministic architecture diff JSON'
+    value: ${{ steps.udpa-gate.outputs.architecture-diff-file }}
   score:
     description: 'Assay Purity Score (0-100)'
     value: ${{ steps.udpa-gate.outputs.score }}
@@ -77,6 +84,12 @@ runs:
           exit "$SEAL_STATUS"
         fi
 
+        node "$ENGINE" floorplan-diff "${{ inputs.target-path }}" --out "${{ inputs.architecture-diff-output }}"
+        DIFF_STATUS=$?
+        if [ "$DIFF_STATUS" -ne 0 ]; then
+          echo "::warning title=UDPA floorplan-diff::Architecture diff export exited with status $DIFF_STATUS"
+        fi
+
         GATE_LOG="$(mktemp)"
         CLEAN_LOG="$(mktemp)"
         node "$ENGINE" underwrite "${{ inputs.target-path }}" --stage "${{ inputs.stage }}" --min-purity "$MIN_PURITY" --sarif-out "${{ inputs.sarif-output }}" | tee "$GATE_LOG"
@@ -99,4 +112,5 @@ runs:
 
         echo "sarif-file=${{ inputs.sarif-output }}" >> "$GITHUB_OUTPUT"
         echo "passport-file=${{ inputs.passport-output }}" >> "$GITHUB_OUTPUT"
+        echo "architecture-diff-file=${{ inputs.architecture-diff-output }}" >> "$GITHUB_OUTPUT"
         echo "score=$SCORE" >> "$GITHUB_OUTPUT"

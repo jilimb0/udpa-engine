@@ -13,9 +13,10 @@ by tag — nothing needs to be vendored into each repository:
     stage: 'Scale'
     sarif-output: 'udpa-audit.sarif'
     passport-output: 'udpa-zk-passport.json'
+    architecture-diff-output: 'architecture-diff.json'
 ```
 
-Outputs: `sarif-file`, `passport-file` (paths to generated artifacts).
+Outputs: `sarif-file`, `passport-file`, `architecture-diff-file`, `score`.
 
 ### Advisory mode
 
@@ -61,14 +62,14 @@ steps:
 
 ## Updating the bundle
 
-Rebuild the CLI in the private `gavel` repository and run:
+Rebuild the self-contained CLI bundle in the private `gavel` repository and copy it here:
 
 ```sh
-npx esbuild apps/cli/dist/index.js --bundle --platform=node --format=cjs \
-  --external:'node:*' --outfile=engine/gavel-engine.cjs --legal-comments=none
+pnpm build:udpa-engine
+cp dist/bin/gavel-engine.cjs ../udpa-engine/engine/gavel-engine.cjs
 ```
 
-Then commit, push, and move the `v1` tag:
+Then commit, push, and update the `v1` tag:
 
 ```sh
 git tag -f v1 && git push -f origin v1

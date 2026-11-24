@@ -22,3 +22,4 @@ udpa-engine — composite GitHub Action `jilimb0/udpa-engine@v1`: UDPA quality &
 
 ## 5. Active ADRs
 - **[ADR-0001](.ai/adr/0001-bundled-gavel-engine-as-versioned-composite-action.md)** (`action.yml`, `engine/**`, `.github/**`): Engine ships as a pre-bundled CJS file behind a tag-versioned composite action, with advisory mode via `fail-on-breach`.
+- **[ADR-0002](.ai/adr/0002-deterministic-architecture-diff-artifact.md)** (`action.yml`, `engine/**`, `.github/**`): Composite action invokes bundled `floorplan-diff` to emit deterministic `architecture-diff.json` (`gavel/floorplan-diff@1`) without printing source contents.
