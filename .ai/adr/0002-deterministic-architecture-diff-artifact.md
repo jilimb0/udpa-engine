@@ -8,7 +8,7 @@
 **Overrides-Global:** None  
 
 ## Y-Summary
-In the context of `jilimb0/udpa-engine@v1` PR gate runs, facing the need to track cross-layer architectural drift without printing repository contents or breaking backwards compatibility, we decided for bundling Gavel's zero-token `floorplan-diff` command inside `engine/gavel-engine.cjs` and emitting `architecture-diff.json` via `architecture-diff-output` in `action.yml`, neglecting consumer-side builds or source-printing logs, to achieve deterministic PR topology diffs alongside SARIF 2.1.0 and Ed25519 passports, accepting a minor bundle size increase inside the 2.5 MB budget.
+In the context of `jilimb0/udpa-engine@v1` PR gate runs, facing the need to track cross-layer architectural drift without printing repository contents or breaking backwards compatibility, we decided for bundling Gavel's zero-token `floorplan-diff` command inside `engine/gavel-engine.cjs` and emitting `architecture-diff.json` via `architecture-diff-output` in `action.yml`, neglecting consumer-side builds or source-printing logs, to achieve deterministic PR topology diffs alongside SARIF 2.1.0 and Ed25519 passports, accepting a minor bundle size increase inside the 5.0 MB self-contained bundle budget.
 
 ## Context and Problem Statement
 CI consumers using `jilimb0/udpa-engine@v1` receive security SARIF and Ed25519 passport outputs, but lacked a deterministic architectural diff artifact (`architecture-diff.json`) showing newly added/removed nodes, edges, and integer `bps` delta metrics on pull requests.

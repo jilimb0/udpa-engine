@@ -17,7 +17,7 @@ udpa-engine — composite GitHub Action `jilimb0/udpa-engine@v1`: UDPA quality &
 - Breaking input/output changes require a new major tag (`v2`); `v1` is moved only for compatible fixes.
 
 ## 4. Data Flows & External Boundaries
-- Inputs: target path, min purity, stage, output paths, `fail-on-breach`. Outputs: `sarif-file`, `passport-file`, `score`.
+- Inputs: `target-path`, `min-purity`, `min-score`, `stage`, `sarif-output`, `passport-output`, `architecture-diff-output`, `fail-on-breach`. Outputs: `sarif-file`, `passport-file`, `architecture-diff-file`, `score`.
 - Used by `udpa-gate` workflows in consumer repositories; no network calls at runtime.
 
 ## 5. Active ADRs
